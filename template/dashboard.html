@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Data Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            margin-top: 30px;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1, h3 {
+            color: #343a40;
+        }
+        p {
+            font-size: 1.1em;
+        }
+        .row {
+            margin-bottom: 20px;
+        }
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .card-header {
+            background-color: #343a40;
+            color: #ffffff;
+            border-radius: 10px 10px 0 0;
+        }
+        .card-body {
+            background-color: #ffffff;
+        }
+        .chart-container {
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-5">Travel Data Dashboard</h1>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Total Completed Trips</div>
+                    <div class="card-body">
+                        <p>{{ results["Total Completed Trips"] }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Total Drivers' Earnings</div>
+                    <div class="card-body">
+                        <p>{{ results["Total Drivers' Earnings"] }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">City with the highest total fare</div>
+                    <div class="card-body">
+                        <p>{{ results["City with the highest total fare"] }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">City with the highest number of completed trips</div>
+                    <div class="card-body">
+                        <p>{{ results["City with the highest number of completed trips"] }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Booking Cancellation Rate</div>
+                    <div class="card-body">
+                        <p>{{ results["Booking Cancellation Rate"] }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">City with the highest number of cancellations</div>
+                    <div class="card-body">
+                        <p>{{ results["City with the highest number of cancellations"] }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Rate of Estimates to Searches for Quotes</div>
+                    <div class="card-body">
+                        <p>{{ results["Rate of Estimates to Searches for Quotes"] }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Quote Acceptance Rate</div>
+                    <div class="card-body">
+                        <p>{{ results["Quote Acceptance Rate"] }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Total Unique Trips excluding the last cell</div>
+                    <div class="card-body">
+                        <p>{{ results["Total Unique Trips excluding the last cell"] }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Total Distance Traveled</div>
+                    <div class="card-body">
+                        <p>{{ results["Total Distance Traveled"] }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Total Searches for quotes</div>
+                    <div class="card-body">
+                        <p>{{ results["Total Searches for quotes"] }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Total Searches that resulted in quotes</div>
+                    <div class="card-body">
+                        <p>{{ results["Total Searches that resulted in quotes"] }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">Top Two Locations by Trip Count</div>
+                    <div class="card-body">
+                        <canvas id="topLocationsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+    
+    <script>
+        var ctx = document.getElementById('topLocationsChart').getContext('2d');
+        var topLocationsChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: {{ results['top_locations']['labels'] | safe }},
+                datasets: [{
+                    label: 'Trip Count',
+                    data: {{ results['top_locations']['data'] | safe }},
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+    
+</body>
+</html>
